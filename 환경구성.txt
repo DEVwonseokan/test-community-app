@@ -1,0 +1,21 @@
+############### docker ###############
+# docker 설치
+winget install -e --id Docker.DockerDesktop
+
+# 컨테이너 기동 (백그라운드)
+docker compose up -d
+
+# 상태 확인
+docker ps
+
+# 로그 확인(선택)
+docker logs -f community-postgres
+
+# 접속 확인(컨테이너 안의 psql 사용)
+docker exec -it community-postgres psql -U app -d appdb -c "select version();"
+
+# 재시작
+docker restart community-postgres
+
+# 중지/삭제(필요시)
+docker compose down
