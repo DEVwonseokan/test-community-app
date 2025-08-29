@@ -1,0 +1,12 @@
+# Next.js 생성 (App Router + TypeScript + Tailwind 기본 세팅)
+cd web
+npx create-next-app@latest . `
+  --typescript `
+  --app `
+  --eslint `
+  --src-dir `
+  --tailwind `
+  --import-alias "@/*"
+
+  #npm run dev 개발 서버 기동 (첫 화면 확인)
+  npm run dev
