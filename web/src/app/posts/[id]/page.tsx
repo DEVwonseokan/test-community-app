@@ -10,10 +10,12 @@ import { fetchPost } from "@/lib/api";
 export default async function PostDetailPage({
                                                  params,
                                              }: {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }) {
-    // 문자열 → 숫자 변환 (안전 차원에서 정수화)
-    const id = Number(params.id);
+    // params가 Promise라면 여기서 await 해줘야 함
+    const { id: idStr } = await params;
+    const id = Number(idStr);
+
     if (!Number.isInteger(id)) {
         // Next.js의 notFound()를 써도 되지만, 간단히 오류를 던지고 not-found로 위임
         throw new Error("Invalid id");

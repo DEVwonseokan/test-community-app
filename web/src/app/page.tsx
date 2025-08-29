@@ -1,6 +1,6 @@
 // web/src/app/page.tsx
 import { getJson, fetchPosts } from "@/lib/api";
-import { PostCard } from "@/components/PostCard";
+import { PostTable } from "@/components/PostTable";
 
 /**
  * 서버 컴포넌트:
@@ -8,12 +8,7 @@ import { PostCard } from "@/components/PostCard";
  * - Java와 비교: 컨트롤러에서 모델을 주입하듯, 여기서는 데이터 fetch 후 JSX로 바로 렌더
  */
 export default async function Home() {
-    // /health (이전 단계와 동일)
     const health = await getJson<{ status: string }>("/health");
-
-    // /posts 목록
-    // - cache: "no-store"는 api.ts의 getJson에서 설정됨 → 항상 최신
-    // - size=20 기본
     const posts = await fetchPosts(20);
 
     return (
@@ -23,19 +18,12 @@ export default async function Home() {
                 <p className="text-sm text-gray-500 mt-1">Backend /health: {health.status}</p>
             </header>
 
-            <section>
-                <h2 className="text-xl font-semibold mb-3">게시글</h2>
-
-                {/* 비어있을 때 처리 */}
-                {posts.length === 0 ? (
-                    <div className="text-gray-500">아직 게시글이 없어요.</div>
-                ) : (
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {posts.map((p) => (
-                            <PostCard key={p.id} post={p} />
-                        ))}
-                    </div>
-                )}
+            <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">게시판</h2>
+                    {/* 추후: 글쓰기 버튼 자리 */}
+                </div>
+                <PostTable posts={posts} />
             </section>
         </main>
     );
