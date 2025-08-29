@@ -1,5 +1,7 @@
 // web/src/lib/api.ts
 
+import type { PostListItem } from "@/types/post";
+
 /**
  * 서버/브라우저 겸용 fetch 헬퍼
  * - Java의 HttpClient로 JSON GET 하는 것과 비슷한 역할
@@ -20,4 +22,13 @@ export async function getJson<T>(path: string): Promise<T> {
         throw new Error(`GET ${path} failed: ${res.status} ${text}`);
     }
     return res.json() as Promise<T>;
+}
+
+/**
+ * /posts 목록을 가져오는 전용 함수
+ * - Java에서라면 Service + HttpClient 조합으로 응답 파싱
+ * - Next.js에서는 fetch + 제네릭 타입(T)으로 타입 안정성 확보
+ */
+export async function fetchPosts(size = 20): Promise<PostListItem[]> {
+    return getJson<PostListItem[]>(`/posts?size=${size}`);
 }

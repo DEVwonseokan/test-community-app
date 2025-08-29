@@ -1,30 +1,42 @@
 // web/src/app/page.tsx
-import { getJson } from "@/lib/api";
+import { getJson, fetchPosts } from "@/lib/api";
+import { PostCard } from "@/components/PostCard";
 
 /**
- * Next.js App Router의 서버 컴포넌트 예시
- * - Java/Spring의 컨트롤러와 달리, 이 컴포넌트 자체가 비동기 렌더링 가능
- * - 서버에서 fetch를 호출하므로 .env의 값이 안전하게 사용됨
+ * 서버 컴포넌트:
+ * - 서버에서 직접 fetch가 실행되므로 .env 값을 안전하게 사용
+ * - Java와 비교: 컨트롤러에서 모델을 주입하듯, 여기서는 데이터 fetch 후 JSX로 바로 렌더
  */
 export default async function Home() {
-  // 타입 정의: { status: string }
-  const health = await getJson<{ status: string }>("/health");
+    // /health (이전 단계와 동일)
+    const health = await getJson<{ status: string }>("/health");
 
-  return (
-      <main className="min-h-screen p-8">
-        <h1 className="text-2xl font-bold mb-4">Community App (Next.js)</h1>
+    // /posts 목록
+    // - cache: "no-store"는 api.ts의 getJson에서 설정됨 → 항상 최신
+    // - size=20 기본
+    const posts = await fetchPosts(20);
 
-        {/* 헬스 체크 결과 표시 */}
-        <div className="rounded-xl border p-4">
-          <div className="text-sm text-gray-500">Backend /health</div>
-          <div className="text-lg">
-            status: <span className="font-mono">{health.status}</span>
-          </div>
-        </div>
+    return (
+        <main className="min-h-screen p-8 space-y-8">
+            <header>
+                <h1 className="text-2xl font-bold">Community App (Next.js)</h1>
+                <p className="text-sm text-gray-500 mt-1">Backend /health: {health.status}</p>
+            </header>
 
-        <p className="mt-6 text-sm text-gray-500">
-          다음 단계에서 /posts 목록을 불러와 카드 리스트로 렌더링할게요.
-        </p>
-      </main>
-  );
+            <section>
+                <h2 className="text-xl font-semibold mb-3">게시글</h2>
+
+                {/* 비어있을 때 처리 */}
+                {posts.length === 0 ? (
+                    <div className="text-gray-500">아직 게시글이 없어요.</div>
+                ) : (
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {posts.map((p) => (
+                            <PostCard key={p.id} post={p} />
+                        ))}
+                    </div>
+                )}
+            </section>
+        </main>
+    );
 }
