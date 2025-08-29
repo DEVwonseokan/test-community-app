@@ -13,9 +13,15 @@ export default async function Home() {
 
     return (
         <main className="min-h-screen p-8 space-y-8">
-            <header>
-                <h1 className="text-2xl font-bold">Community App (Next.js)</h1>
-                <p className="text-sm text-gray-500 mt-1">Backend /health: {health.status}</p>
+            <header className="flex items-end justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold">Community App (Next.js)</h1>
+                    <p className="text-sm text-gray-500 mt-1">Backend /health: {health.status}</p>
+                </div>
+                <div className="space-x-2">
+                    <a href="/login" className="px-3 py-2 rounded border hover:bg-gray-50">로그인</a>
+                    <a href="/posts/new" className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">글쓰기</a>
+                </div>
             </header>
 
             <section className="space-y-3">
