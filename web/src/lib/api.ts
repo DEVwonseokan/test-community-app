@@ -1,6 +1,6 @@
 // web/src/lib/api.ts
 
-import type { PostListItem } from "@/types/post";
+import type { PostListItem, PostDetail } from "@/types/post";
 
 /**
  * 서버/브라우저 겸용 fetch 헬퍼
@@ -31,4 +31,9 @@ export async function getJson<T>(path: string): Promise<T> {
  */
 export async function fetchPosts(size = 20): Promise<PostListItem[]> {
     return getJson<PostListItem[]>(`/posts?size=${size}`);
+}
+
+/** 단건 상세 조회 */
+export async function fetchPost(id: number): Promise<PostDetail> {
+    return getJson<PostDetail>(`/posts/${id}`);
 }
