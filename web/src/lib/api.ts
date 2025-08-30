@@ -1,6 +1,7 @@
 // web/src/lib/api.ts
 
 import type { PostListItem, PostDetail } from "@/types/post";
+import { Me } from "@/types/user";
 import { getToken } from "./auth";
 
 /**
@@ -72,4 +73,23 @@ export async function updatePost(
         const text = await res.text();
         throw new Error(`PATCH /posts/${id} 실패: ${res.status} ${text}`);
     }
+
+}
+
+// ─────────────────────────────────────────────────────────────
+// 내 정보 조회 (/auth/me)
+// - 성공: Me
+// - 실패: null (토큰 없음/만료 등)
+// ─────────────────────────────────────────────────────────────
+export async function fetchMe(): Promise<Me | null> {
+    const token = getToken();                             // 1) 토큰 읽기
+    if (!token) return null;                              // 2) 토큰 없으면 비로그인으로 간주
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },      // 3) 인증 헤더 첨부
+        cache: "no-store",                                  // 4) 항상 최신 값
+    });
+
+    if (!res.ok) return null;                             // 5) 401/403 등 실패 → null
+    return (await res.json()) as Me;                      // 6) 성공 → Me
 }
