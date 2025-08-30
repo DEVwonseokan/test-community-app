@@ -42,14 +42,25 @@ export default function Header() {
             {/* 좌측 로고 */}
             <Link href="/" className="text-xl font-bold">Community App</Link>
 
-            {/* 우측 로그인 상태 */}
+            {/* 우측 영역 */}
             <div className="space-x-2">
                 {me ? (
-                    // ✅ 로그인 상태 → 닉네임 + 로그아웃
+                    // ✅ 로그인 상태
                     <>
-            <span className="text-sm text-gray-600">
+                        {/* 닉네임 표시 */}
+                        <span className="text-sm text-gray-600">
               {me.nickname} (<span className="text-gray-400">#{me.id}</span>)
             </span>
+
+                        {/* 글쓰기 버튼 (로그인 상태에서만 보임) */}
+                        <Link
+                            href="/posts/new"
+                            className="px-3 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                        >
+                            글쓰기
+                        </Link>
+
+                        {/* 로그아웃 버튼 */}
                         <button
                             onClick={logout}
                             className="px-3 py-2 rounded border hover:bg-gray-50"
@@ -58,13 +69,15 @@ export default function Header() {
                         </button>
                     </>
                 ) : (
-                    // ❌ 비로그인 상태 → 로그인 버튼
-                    <Link
-                        href="/login"
-                        className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-                    >
-                        로그인
-                    </Link>
+                    // ❌ 비로그인 상태
+                    <>
+                        <Link
+                            href="/login"
+                            className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                            로그인
+                        </Link>
+                    </>
                 )}
             </div>
         </header>

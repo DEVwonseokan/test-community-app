@@ -26,6 +26,40 @@ export async function getJson<T>(path: string): Promise<T> {
     return res.json() as Promise<T>;
 }
 
+// ─────────────────────────────────────────────────────────────
+// 글 생성 API: POST /posts
+// - body: { title, content }
+// - 성공: { id: number }
+// - 실패: throw Error (상위에서 잡아 UI 표시)
+// ─────────────────────────────────────────────────────────────
+export async function createPost(body: { title: string; content: string }): Promise<{ id: number }> {
+    // 1) 토큰이 없으면 비로그인 → 에러
+    const token = getToken();
+    if (!token) throw new Error("로그인이 필요합니다.");
+
+    // 2) 백엔드 주소 (환경변수로 주입)
+    const base = process.env.NEXT_PUBLIC_API_BASE;
+
+    // 3) 실제 POST 요청 (인증 헤더 + JSON 바디)
+    const res = await fetch(`${base}/posts`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",               // JSON 전송
+            "Authorization": `Bearer ${token}`,               // 인증 토큰
+        },
+        body: JSON.stringify(body),                         // { title, content }
+    });
+
+    // 4) 실패 응답이면 에러로 승격(상위에서 메시지 표시)
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`글쓰기 실패 (${res.status}) ${text}`);
+    }
+
+    // 5) 성공: { id } 반환
+    return res.json() as Promise<{ id: number }>;
+}
+
 /**
  * /posts 목록을 가져오는 전용 함수
  * - Java에서라면 Service + HttpClient 조합으로 응답 파싱
