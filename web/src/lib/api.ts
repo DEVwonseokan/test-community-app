@@ -1,6 +1,7 @@
 // web/src/lib/api.ts
 
 import type { PostListItem, PostDetail } from "@/types/post";
+import { getToken } from "./auth";
 
 /**
  * 서버/브라우저 겸용 fetch 헬퍼
@@ -36,4 +37,39 @@ export async function fetchPosts(size = 20): Promise<PostListItem[]> {
 /** 단건 상세 조회 */
 export async function fetchPost(id: number): Promise<PostDetail> {
     return getJson<PostDetail>(`/posts/${id}`);
+}
+
+/** 게시글 삭제 */
+export async function deletePost(id: number): Promise<void> {
+    const token = getToken();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/posts/${id}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`DELETE /posts/${id} 실패: ${res.status} ${text}`);
+    }
+}
+
+/** 게시글 수정 */
+export async function updatePost(
+    id: number,
+    body: { title: string; content: string }
+): Promise<void> {
+    const token = getToken();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/posts/${id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`PATCH /posts/${id} 실패: ${res.status} ${text}`);
+    }
 }

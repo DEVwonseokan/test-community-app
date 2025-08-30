@@ -14,13 +14,14 @@ export type PostListItem = {
 
 /**
  * 백엔드 PostDetail DTO와 매칭
- * - content, authorNickname, updatedAt 추가
  */
 export type PostDetail = {
     id: number;
     title: string;
     content: string;
+    authorId: number | null;
     authorNickname: string | null;
     createdAt: string;
     updatedAt: string;
+    mine: boolean;
 };
