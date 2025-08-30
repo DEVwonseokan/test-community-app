@@ -200,3 +200,26 @@ export async function deleteComment(commentId: number): Promise<void> {
     });
     if (!res.ok) throw new Error(`댓글 삭제 실패: ${res.status}`);
 }
+
+// 댓글 수정 API. 인증이 필요하다.
+export async function updateComment(commentId: number, content: string): Promise<{ id: number }> {
+    // 1) 토큰을 가져온다. 없으면 로그인 요구.
+    const token = getToken();
+    if (!token) throw new Error("로그인이 필요합니다.");
+
+    // 2) PATCH 요청을 보낸다. 본문에는 새 content만 보낸다.
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/comments/${commentId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 서버에서 인증 필터가 읽을 헤더
+        },
+        body: JSON.stringify({ content }),
+    });
+
+    // 3) 실패 시 상태코드로 에러를 만든다.
+    if (!res.ok) throw new Error(`댓글 수정 실패: ${res.status}`);
+
+    // 4) 서버가 반환한 id를 그대로 넘겨준다.
+    return (await res.json()) as { id: number };
+}
