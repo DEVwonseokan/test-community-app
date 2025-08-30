@@ -2,6 +2,7 @@
 
 import type { PostListItem, PostDetail } from "@/types/post";
 import { Me } from "@/types/user";
+import { CommentItem } from "@/types/comment";
 import { getToken } from "./auth";
 
 /**
@@ -155,4 +156,47 @@ export async function fetchMe(): Promise<Me | null> {
 
     if (!res.ok) return null;                             // 5) 401/403 등 실패 → null
     return (await res.json()) as Me;                      // 6) 성공 → Me
+}
+
+// ─────────────────────────────────────────────────────────────
+// 댓글 목록 가져오기 (공개)
+// - SSR에서도 호출 가능(Authorization 없이)
+// ─────────────────────────────────────────────────────────────
+export async function fetchComments(postId: number, size = 50): Promise<CommentItem[]> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/posts/${postId}/comments?size=${size}`, {
+        cache: "no-store", // 항상 최신
+    });
+    if (!res.ok) throw new Error(`댓글 목록 실패: ${res.status}`);
+    return (await res.json()) as CommentItem[];
+}
+
+// ─────────────────────────────────────────────────────────────
+// 댓글 작성 (인증 필요)
+// ─────────────────────────────────────────────────────────────
+export async function createComment(postId: number, content: string): Promise<{ id: number }> {
+    const token = getToken();
+    if (!token) throw new Error("로그인이 필요합니다.");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/posts/${postId}/comments`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content }),
+    });
+    if (!res.ok) throw new Error(`댓글 작성 실패: ${res.status}`);
+    return (await res.json()) as { id: number };
+}
+
+// ─────────────────────────────────────────────────────────────
+// 댓글 삭제(인증 + 내 댓글만)
+// ─────────────────────────────────────────────────────────────
+export async function deleteComment(commentId: number): Promise<void> {
+    const token = getToken();
+    if (!token) throw new Error("로그인이 필요합니다.");
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/comments/${commentId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`댓글 삭제 실패: ${res.status}`);
 }

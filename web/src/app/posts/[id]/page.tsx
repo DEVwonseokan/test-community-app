@@ -10,6 +10,10 @@ import Link from "next/link";                         // Next 내부 라우팅 �
 import { fetchPost } from "@/lib/api";                // 백엔드에서 게시글 상세 가져오는 헬퍼
 import ClientOwnedActionBar from "./ClientOwnedActionBar"; // 클라 전용 액션바(수정/삭제 버튼)
 
+import Comments from "./Comments";                 // 댓글 UI (클라이언트 컴포넌트)
+import { fetchComments } from "@/lib/api";         // SSR로 초기 목록도 가져오자
+import { CommentItem } from "@/types/comment";
+
 // 서버 컴포넌트(SSR): 게시글 상세 페이지
 export default async function PostDetailPage({
                                                  params,
@@ -18,7 +22,7 @@ export default async function PostDetailPage({
     params: Promise<{ id: string }>;
 }) {
     // 1) URL에서 글 ID 꺼내기
-    const { id: idStr } = await params;
+    const {id: idStr} = await params;
 
     // 2) 문자열 → 숫자(정수) 검증
     const id = Number(idStr);
@@ -26,6 +30,16 @@ export default async function PostDetailPage({
 
     // 3) 서버에서 상세 데이터 가져오기 (SSR)
     const post = await fetchPost(id);
+
+    // SSR로 초기 댓글 목록 20개 가져오기 (선택이지만 UX 좋아짐)
+    let initialComments: CommentItem[] | undefined = [];
+    try {
+        initialComments = await fetchComments(id, 20);
+    } catch {
+        // 403/500 등 실패해도 상세 페이지는 보여주고,
+        // 댓글 영역은 클라이언트에서 재시도하거나 빈 상태로 시작한다.
+        initialComments = [];
+    }
 
     // 4) 날짜를 한국어 포맷으로 보기 좋게 변환
     const createdFmt = new Intl.DateTimeFormat("ko-KR", {
@@ -66,6 +80,9 @@ export default async function PostDetailPage({
             <section className="prose max-w-none whitespace-pre-wrap">
                 {post.content}
             </section>
+
+            {/* 댓글 섹션 (initial을 넘겨주면 첫 렌더가 빠르고 깜빡임 적음) */}
+            <Comments postId={post.id} initial={initialComments} />
         </main>
     );
 }
