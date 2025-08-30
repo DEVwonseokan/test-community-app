@@ -27,6 +27,35 @@ export async function getJson<T>(path: string): Promise<T> {
 }
 
 // ─────────────────────────────────────────────────────────────
+// 로그인 API: POST /auth/login
+// - body: { email, password }
+// - 성공: { accessToken: string, ... }
+// - 실패: throw Error (상위에서 UI 처리)
+// ─────────────────────────────────────────────────────────────
+export async function login(
+    body: { email: string; password: string }
+): Promise<{ accessToken: string }> {
+    // 1) 백엔드 베이스 URL (환경변수)
+    const base = process.env.NEXT_PUBLIC_API_BASE;
+
+    // 2) 로그인 요청 (JSON 바디)
+    const res = await fetch(`${base}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, // JSON 전송
+        body: JSON.stringify(body),
+    });
+
+    // 3) 실패 시 에러 승격 (상위에서 메시지 표시)
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`로그인 실패 (${res.status}) ${text}`);
+    }
+
+    // 4) 성공: 액세스 토큰 반환
+    return (await res.json()) as { accessToken: string };
+}
+
+// ─────────────────────────────────────────────────────────────
 // 글 생성 API: POST /posts
 // - body: { title, content }
 // - 성공: { id: number }
