@@ -1,0 +1,7 @@
+#cd web
+npm ci
+npm run build
+
+docker build -f web/Dockerfile.runtime -t kargo95/community-frontend:1.0.1 ./web
+
+docker push kargo95/community-frontend:1.0.1

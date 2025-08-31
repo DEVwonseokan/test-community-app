@@ -4,13 +4,18 @@ import type { PostListItem, PostDetail } from "@/types/post";
 import { Me } from "@/types/user";
 import { CommentItem } from "@/types/comment";
 import { getToken } from "./auth";
+// 1) 서버 전용 베이스 (컨테이너 간 통신용)
+const SERVER_BASE =
+    process.env.INTERNAL_API_BASE               // 런타임에 주입되면 이것 우선
+    || "http://backend:8080";                   // 디폴트: compose 서비스명
 
-/**
- * 서버/브라우저 겸용 fetch 헬퍼
- * - Java의 HttpClient로 JSON GET 하는 것과 비슷한 역할
- * - baseUrl은 .env.local에서 가져옴
- */
-const BASE = process.env.NEXT_PUBLIC_API_BASE; // 예: http://localhost:8080
+// 2) 클라이언트 전용 베이스 (브라우저가 접근할 공개 도메인)
+const CLIENT_BASE =
+    process.env.NEXT_PUBLIC_API_BASE            // 빌드/런타임 주입 가능
+    || "http://localhost:8080";                 // 개발 기본값
+
+// 3) 실행 환경에 따라 선택
+const BASE = typeof window === "undefined" ? SERVER_BASE : CLIENT_BASE;
 
 export async function getJson<T>(path: string): Promise<T> {
     const res = await fetch(`${BASE}${path}`, {

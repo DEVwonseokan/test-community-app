@@ -1,0 +1,23 @@
+# 1) 경량 Node 런타임
+FROM node:20-alpine
+
+# 2) 비루트 유저
+RUN addgroup -S app && adduser -S app -G app
+USER app
+WORKDIR /app
+
+# 3) standalone 산출물만 복사
+#    .next/standalone 안에 server.js와 필요한 node_modules가 포함됨
+COPY --chown=app:app .next/standalone ./
+COPY --chown=app:app .next/static ./.next/static
+COPY --chown=app:app public ./public
+
+# 4) 실행 환경 변수
+#    API 엔드포인트는 NAS 내부 DNS 서비스명(뒤의 compose에서 backend)로 맞춘다.
+ENV PORT=3000
+ENV NEXT_PUBLIC_API_BASE=http://backend:8080
+
+EXPOSE 3000
+
+# 5) 기동
+CMD ["node","server.js"]

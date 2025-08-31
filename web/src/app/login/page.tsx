@@ -6,16 +6,24 @@
 // 2) 실제 폼/이벤트/리다이렉트는 클라이언트 컴포넌트에서 처리
 // ──────────────────────────────────────────────────────────────
 
-import LoginForm from "./LoginForm"; // ✨ 클라이언트 전용 폼 (아래 파일)
+import { Suspense } from "react";
+import LoginForm from "./LoginForm";
 
-export default async function LoginPage() {
-    // 서버에서는 로컬스토리지 접근 불가 → 폼/제출/리다이렉트는 클라에서 처리
+// 페이지는 서버에서 쿼리 파라미터를 받습니다.
+export default function LoginPage({
+                                      searchParams,
+                                  }: {
+    searchParams?: { returnTo?: string };
+}) {
+    // 쿼리에서 returnTo를 안전하게 파싱
+    const returnToRaw = searchParams?.returnTo ?? "/";
+    const returnTo =
+        typeof returnToRaw === "string" ? decodeURIComponent(returnToRaw) : "/";
+
+    // 클라이언트 컴포넌트를 Suspense로 감싸면 프리렌더링 문제가 사라집니다.
     return (
-        <main className="min-h-screen p-8 flex justify-center">
-            <div className="w-full max-w-md">
-                <h1 className="text-xl font-bold mb-4">로그인</h1>
-                <LoginForm />
-            </div>
-        </main>
+        <Suspense fallback={null}>
+            <LoginForm returnTo={returnTo} />
+        </Suspense>
     );
 }

@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation"; // 클라 라우�
 import { login } from "@/lib/api";                        // 로그인 API 호출
 import { getUserIdFromToken } from "@/lib/auth";          // 토큰 디코드(선택: 디버그용)
 
-export default function LoginForm() {
+export default function LoginForm({ returnTo }: { returnTo: string }) {
     // 1) 라우팅/쿼리 훅
     const router = useRouter();                 // 페이지 이동에 사용
     const search = useSearchParams();           // ?returnTo=/xxx 읽기
@@ -44,9 +44,8 @@ export default function LoginForm() {
             // (선택) 디버그: 내 userId가 무엇인지 확인하고 싶다면 아래 주석 해제
             // console.log("userId:", getUserIdFromToken(accessToken));
 
-            // 3-4) returnTo가 있으면 그쪽으로, 없으면 홈('/')으로 이동
-            const returnTo = search.get("returnTo") || "/";
-            router.replace(returnTo);
+            // 성공 시 이동
+            window.location.href = returnTo || "/";
         } catch (err: any) {
             // 3-5) 실패 메시지
             setError(err?.message ?? "로그인에 실패했습니다.");
